@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MenuMapper">
+
+	<resultMap type="Menu" id="menuResultMap">
+		<id column="ID" property="id"/>
+		<result column="MENU_NAME" property="menu_name"/>
+		<result column="MENU_URL" property="menu_url"/>
+		<result column="PARENT_ID" property="parent_id"/>
+		<result column="MENU_ORDER" property="menu_order"/>
+		<result column="MENU_ICON" property="menu_icon"/>
+		<result column="MENU_TYPE" property="menu_type"/>
+		<result column="STATUS" property="status" />
+		<result column="REMARK" property="remark" />
+		<result column="CREATE_TIME" property="create_time" />
+		<result column="CREATE_USER" property="create_user" />
+		<result column="UPDATE_TIME" property="update_time" />
+		<result column="UPDATE_USER" property="update_user" />
+	</resultMap>
+	
+	
+	<sql id="tableMenu">
+		SYS_MENU
+	</sql>
+	<sql id="columnMenu">
+		ID,MENU_NAME,MENU_URL,PARENT_ID,MENU_ORDER,MENU_ICON,MENU_TYPE,
+		STATUS,REMARK,CREATE_TIME,CREATE_USER,UPDATE_TIME,UPDATE_USER
+	</sql>
+	
+	<select id="getUserParentMenu" parameterType="String" resultMap="menuResultMap">
+		 SELECT 
+		 <include refid="columnMenu" />
+		  	FROM SYS_MENU WHERE ID IN (
+				SELECT MENU_ID FROM SYS_ROLE_MENU 
+					WHERE 
+						ROLE_ID IN (
+						SELECT ROLE_ID FROM SYS_USER_ROLE WHERE 
+						USER_ID = #{id} AND STATUS = '0') AND STATUS = '0'
+				) AND STATUS = '0' AND PARENT_ID = '0' ORDER BY MENU_ORDER 
+	</select>
+	
+	<select id="getUserSubMenu" parameterType="pd" resultMap="menuResultMap">
+		 SELECT 
+		 <include refid="columnMenu" />
+		  	FROM SYS_MENU WHERE ID IN (
+				SELECT MENU_ID FROM SYS_ROLE_MENU 
+					WHERE 
+						ROLE_ID IN (
+						SELECT ROLE_ID FROM SYS_USER_ROLE WHERE 
+						USER_ID = #{user_id} AND STATUS = '0') AND STATUS = '0'
+				) AND STATUS = '0' AND PARENT_ID = #{parent_id} AND PARENT_ID ORDER BY MENU_ORDER 
+				
+	</select>
+	
+	
+	<select id="getAllParentMenu" parameterType="pd" resultMap="menuResultMap">
+		 SELECT 
+		 <include refid="columnMenu" />
+		  	FROM SYS_MENU WHERE  STATUS = '0' AND PARENT_ID = '0'
+	</select>
+	
+	
+	<select id="getAllSubMenu" parameterType="pd" resultMap="menuResultMap">
+		 SELECT 
+		 <include refid="columnMenu" />
+		  	FROM SYS_MENU WHERE  STATUS = '0' AND PARENT_ID = #{parent_id}
+	</select>
+</mapper>
